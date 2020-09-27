@@ -1,0 +1,181 @@
+entity App{
+	name String required
+}
+
+entity Attachment {
+	uri String required
+    description String required
+}
+
+entity DefaultQuestionTypeAlternative {
+	description String required
+}
+
+entity DefaultQuestionTypeAlternativeAttachment{
+	attachmentDate Instant required
+}
+
+entity Question {
+	description String required
+    createdDate Instant required
+}
+
+entity QuestionAlternative {
+	description String required
+}
+
+entity QuestionAlternativeAttachment{
+	attachmentDate Instant required
+}
+
+entity QuestionAttachment{
+	attachmentDate Instant required
+}
+
+entity Questionnaire {
+	description String required
+    createdDate Instant required
+}
+
+entity QuestionOnQuestionnaire{
+	inclusionDate Instant required
+    positionOnQuestionnaire Integer required
+}
+
+entity QuestionType {
+	typeName String required
+}
+
+entity Skill {
+	skillName String required
+}
+
+entity OrganisationLevel{
+	name String required
+}
+
+entity AssessmentCycle{
+	cycleName String required
+    validFrom LocalDate required
+    validTo LocalDate required
+}
+
+entity AssessmentFromCycle{
+	description String required
+    createdDate Instant required
+}
+
+entity Group{
+	groupName String required
+}
+
+entity GroupMember{
+	assignedDate LocalDate required
+}
+
+entity Employee {
+	name String required
+    cpf String required
+    password String required
+    isManager Boolean required
+}
+
+entity Assessment{
+	createdDate Instant required
+}
+
+entity AssessmentAssessor{
+	createdDate Instant required
+}
+
+entity AssessmentAnswer{
+	openAnswer String
+    createdDate Instant required
+}
+
+entity SelfAssessmentAnswer{
+	openAnswer String
+    createdDate Instant required
+}
+
+enum DisputeStatus {
+  OPEN,
+  CLOSED_ACCEPTED,
+  CLOSED_REJECTED
+}
+
+entity AssessmentAssessorDispute{
+	justification String required
+    disputeStatus DisputeStatus required
+    closedDate Instant
+    resolution String
+}
+
+entity TaskType{
+	typeName String required
+}
+
+enum TaskStatus{
+	CLOSED,
+    OPEN
+}
+
+entity Task{
+	status TaskStatus required
+    createdDate LocalDate required
+    dueDate LocalDate required
+    completedDate Instant
+}
+
+relationship OneToMany {
+	App{appQuestions} to Question{app (name) required}
+	Questionnaire{questionsOfTheQuestionnaire} to QuestionOnQuestionnaire{questionnaire (description) required} 
+    Question{presenceOnQuestionnaires} to QuestionOnQuestionnaire {question (description) required} 
+    Skill{skillsOfQuestion} to Question{skill (skillName) required} 
+    QuestionType{questionsOfType} to Question{questionType (typeName) required}
+    Question{questionAlternatives} to QuestionAlternative{question (description) required}
+    QuestionType{defaultAlternatives} to DefaultQuestionTypeAlternative{questionType (typeName) required}
+    Attachment to QuestionAttachment{attachment (description) required}
+    Attachment to QuestionAlternativeAttachment{attachment (description) required}
+    Attachment to DefaultQuestionTypeAlternativeAttachment{attachment (description) required}
+    Question{attachments} to QuestionAttachment{question (description) required}
+    QuestionAlternative{attachments} to QuestionAlternativeAttachment{questionAlternative (description) required}
+    DefaultQuestionTypeAlternative{attachments} to DefaultQuestionTypeAlternativeAttachment{alternative (description) required}
+    
+    Group{groupMembers} to GroupMember{group (groupName) required}
+    Employee{groupMemberships} to GroupMember{member (name) required}
+    OrganisationLevel{levelGroupMembers} to GroupMember{level (name) required}
+    OrganisationLevel{assessmentsOfLevel} to AssessmentFromCycle{orgLevel (name) required}
+    AssessmentCycle{assessmentsOfCycle} to AssessmentFromCycle{cycle (cycleName) required}
+    Questionnaire{presenceInQuestionnaire} to AssessmentFromCycle{questionnaire (description) required}
+    AssessmentFromCycle{assessments} to Assessment{cycle required}
+    Employee{receivedAssessments} to Assessment{assessedEmployee (name) required}
+    Employee{assessmentParticipations} to AssessmentAssessor{assessor (name) required}
+    Assessment{assessors} to AssessmentAssessor{assessment required}
+    AssessmentAssessor{assessorDisputes} to AssessmentAssessorDispute{originalAssessor required}
+    Employee to AssessmentAssessorDispute{suggestedAssessor (name)}
+    Employee to AssessmentAssessorDispute{assessorOverride (name)}
+    
+    Question to AssessmentAnswer{question required}
+    Question to SelfAssessmentAnswer{question required}
+    QuestionAlternative to AssessmentAnswer{selectedAlternative required}
+    QuestionAlternative to SelfAssessmentAnswer{selectedAlternative required}
+    AssessmentAssessor{answers} to AssessmentAnswer{assessor required}
+    Employee{selfAssessmentAnswers} to SelfAssessmentAnswer{employee required}
+    
+    TaskType{tasks} to Task{taskType (typeName) required}
+    Employee{tasks} to Task{completedBy (name) required}
+}
+
+// Set pagination options
+paginate Question with infinite-scroll
+paginate all with pagination except Question
+
+// Use Data Transfert Objects (DTO)
+// dto * with mapstruct
+
+// Set service options to all except few
+service all with serviceImpl
+
+// Set an angular suffix
+// angularSuffix * with mySuffix
