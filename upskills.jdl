@@ -153,8 +153,8 @@ relationship OneToMany {
     Employee{assessmentParticipations} to AssessmentAssessor{assessor (name) required}
     Assessment{assessors} to AssessmentAssessor{assessment required}
     AssessmentAssessor{assessorDisputes} to AssessmentAssessorDispute{originalAssessor required}
-    Employee to AssessmentAssessorDispute{suggestedAssessor (name)}
-    Employee to AssessmentAssessorDispute{assessorOverride (name)}
+    Employee{suggestionsOnDisputes} to AssessmentAssessorDispute{suggestedAssessor (name)}
+    Employee{overridesOnDisputes} to AssessmentAssessorDispute{assessorOverride (name)}
     
     Question to AssessmentAnswer{question required}
     Question to SelfAssessmentAnswer{question required}
